@@ -7,7 +7,7 @@ link deploy PWS: https://nalakrishna-abimanyu-here-we-goods.pbp.cs.ui.ac.id/
 - Atur routing di urls.py di direktori main dan include di urls.py direktori here_we_goods. 
 - Buat home.html dan tampilkan nama aplikasi + nama & kelas.
 
-2. 
+2. ![penjelasan nomor 2](https://github.com/NalaWicaksono/here-we-goods/blob/master/bagan%20dan%20penjelasan%20file.jpg)
 
 3. settings.py adalah pusat konfigurasi proyek. Di sini kita mendaftarkan aplikasi INSTALLED_APPS, menyusun middleware, mengatur sistem template, koneksi database, juga keamanan dasar seperti ALLOWED_HOSTS
 4. Alur migrasi adalah: ubah model -> jalankan makemigrations untuk membuat file migrasi (berisi operasi skema) -> jalankan migrate agar operasi itu diterapkan ke database dan dicatat riwayatnya. 
