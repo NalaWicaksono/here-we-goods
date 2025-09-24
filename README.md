@@ -38,3 +38,44 @@ Tugas 3
 - Templates: home.html, add_item.html, detail_item.html; selalu gunakan {% csrf_token %}.
 
 6. Mungkin tambahkan cara troubleshooting masalah yang umum terjadi. kemarin saya sudah mengerjakan tutorial tapi hasilnya sempat error
+
+
+Tugas 4
+1. AuthenticationForm adalah form jadi untuk login bawaan django. Kita tinggal pakai untuk mengecek username dan password ke database.
+
+Kelebihan:
+- Praktis: langsung pakai tanpa bikin form sendiri.
+- Aman: password dibandingkan dengan hash di database.
+
+Kekurangan:
+- Tampilannya polos dan kurang menarik
+
+2. Simpelnya, Autentikasi adalah proses pengecekan pengguna (siapa yang sedang mengakses), biasanya dilakukan pada proses login, sedangkan otorisasi adalah pengecekan apakah pengguna berhak melakukan hal tertentu.
+
+Di Django:
+- Autentikasi: pakai model User, fungsi login() dan logout(), dan session.
+
+- Otorisasi: pakai @login_required, permission, dan group.
+Contoh paling sering: @login_required untuk membatasi halaman hanya bagi yang sudah login 
+
+3. Kelebihan:
+- cookies: Cocok untuk info ringan
+- session: Lebih aman untuk data penting dan bisa lebih besar.
+
+Kekurangan:
+- cookies: Bisa diutak-atik user, kapasitas kecil, perlu pengamanan
+- session: Menambah beban penyimpanan di server.
+
+4. Belum tentu aman. Ada risiko dicuri/dibajak (XSS, session hijacking), CSRF, atau dimanipulasi.
+
+Mitigasi yang disarankan:
+- Pasang atribut HttpOnly, Secure, SameSite.
+- Jangan taruh data rahasia di cookie.
+- Aktifkan perlindungan CSRF bawaan Django.
+- Gunakan HTTPS.
+
+5. - menambahkan fungsi register dan login lalu menambahkan kode pada file html login.html dan register.html
+- merestriksi dengan menambahkan @login_required pada beberapa fungsi
+- membuat fungsi logout dan menambahkan tombol logout di main page
+- Hubungkan data dengan user dengan menambahkan field user = models.ForeignKey(User, ...) pada model 
+- manambahkan routing di urls.py

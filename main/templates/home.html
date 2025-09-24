@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="utf-8" />
-  <title>here we goods</title>
+  <title>Here We Goods</title>
   <style>
     :root { --bg:#fff; --ink:#111; --muted:#666; --card:#fafafa; --ring:#e6e6e6; }
     *{ box-sizing:border-box }
@@ -30,41 +30,53 @@
       <h1 class="site-title">Here We Goods</h1>
       <p class="tagline">Embroidered Sports Apparel</p>
       <div class="actions">
-        <a href="{% url 'add_item' %}">Add</a>
+       <a href="{% url 'main:add_item' %}">Add</a>
+
       </div>
     </div>
   </header>
+
+<a href="{% url 'main:logout' %}">
+  <button>Logout</button>
+</a>
+<a href="?filter=all"><button type="button">All Items</button></a>
+<a href="?filter=my"><button type="button">My Items</button></a>
+
 
   <main class="container">
     <!-- SUBJUDUL UNTUK LIST ITEM -->
     <h2 class="section-title">Items</h2>
 
     <div class="grid">
-      {% for item in items %}
-        <article class="card">
-          {% if item.image %}
-            <img class="thumb" src="{{ item.image.url }}" alt="{{ item.name }}">
-          {% else %}
-            <img class="thumb" src="https://via.placeholder.com/800x600?text=No+Image" alt="">
-          {% endif %}
-          <div class="card-body">
-            <h3 class="name">{{ item.name }}</h3> <!-- subjudul per item -->
-            <p class="desc">{{ item.description|default:"No description" }}</p>
-            <p style="margin-top:8px;font-size:12px">
-              <a href="{% url 'show_json_by_id' item.pk %}">JSON</a> ·
-              <a href="{% url 'show_xml_by_id' item.pk %}">XML</a>
-            </p>
-          </div>
-        </article>
-      {% empty %}
-        <p class="empty">Belum ada data.</p>
-      {% endfor %}
-    </div>
+  {% for item in product_list %}
+    <article class="card">
+      {% if item.thumbnail %}
+      <img class="thumb" src="{{ item.thumbnail }}" alt="{{ item.name }}">
+      {% else %}
+      <img class="thumb" src="https://via.placeholder.com/800x600?text=No+Image" alt="">
+      {% endif %}
+
+
+      <div class="card-body">
+        <h3 class="name">{{ item.name }}</h3>
+        <p class="desc">{{ item.description|default:"No description" }}</p>
+        <p style="margin-top:8px;font-size:12px">
+          <a href="{% url 'main:show_json_by_id' item.pk %}">JSON</a> ·
+          <a href="{% url 'main:show_xml_by_id' item.pk %}">XML</a>
+        </p>
+      </div>
+    </article>
+  {% empty %}
+    <p class="empty">Belum ada data.</p>
+  {% endfor %}
+</div>
+
+<h5>Sesi terakhir login: {{ last_login }}</h5>
 
     <h2 class="section-title">Data Delivery</h2>
     <ul>
-      <li><a href="{% url 'show_json' %}">/json/</a></li>
-      <li><a href="{% url 'show_xml' %}">/xml/</a></li>
+      <li><a href="{% url 'main:show_json' %}">/json/</a></li>
+      <li><a href="{% url 'main:show_xml' %}">/xml/</a></li>
     </ul>
   </main>
 </body>
