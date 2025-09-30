@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block meta %}<title>{{ product.name }}</title>{% endblock meta %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+    <!-- FOTO PRODUK DITAMPILKAN -->
+    <img class="w-full aspect-[16/9] object-cover" src="{{ product.thumbnail|default:'https://via.placeholder.com/1200x675?text=Jersey' }}" alt="{{ product.name }}">
+    <div class="p-6">
+      <h1 class="text-3xl font-bold text-white">{{ product.name }}</h1>
+      <p class="text-slate-300 mt-1">Rp {{ product.price|floatformat:0 }}</p>
+      <p class="mt-4 text-slate-200 whitespace-pre-line">{{ product.description }}</p>
+      <div class="mt-6 flex gap-2">
+        <a href="{% url 'main:show_main' %}" class="px-4 py-2 border border-slate-700 rounded text-slate-200 hover:bg-slate-700">Kembali</a>
+        {% if user.is_authenticated %}
+          <a href="{% url 'main:product_edit' product.pk %}" class="px-4 py-2 border border-slate-700 rounded text-slate-200 hover:bg-slate-700">Edit</a>
+          <a href="{% url 'main:product_delete' product.pk %}" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded">Delete</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

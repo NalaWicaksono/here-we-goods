@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block meta %}<title>Tambah Product</title>{% endblock meta %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 sm:p-8 form-style dark-form">
+    <h1 class="text-2xl font-bold text-white mb-6">Tambah Product</h1>
+
+    <form method="POST" class="space-y-6">
+      {% csrf_token %}
+      {{ form.as_p }}
+
+      <div class="flex gap-3">
+        <a href="{% url 'main:show_main' %}"
+           class="px-4 py-2 border border-slate-600 text-slate-200 rounded hover:bg-slate-700">
+          Batal
+        </a>
+        <button type="submit"
+                class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded">
+          Simpan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock content %}

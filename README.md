@@ -79,3 +79,43 @@ Mitigasi yang disarankan:
 - membuat fungsi logout dan menambahkan tombol logout di main page
 - Hubungkan data dengan user dengan menambahkan field user = models.ForeignKey(User, ...) pada model 
 - manambahkan routing di urls.py
+
+
+Tugas 5
+1. Urutan kekuatan aturan: inline style → ID # → class ./attribute/pseudo-class → tag elemen/pseudo-elemen. Jika levelnya sama, aturan yang muncul paling akhir di CSS menang. (Catatan: !important bisa mengalahkan urutan normal, tapi gunakan hemat.)
+
+2. Satu basis kode untuk berbagai ukuran layar membuat tampilan konsisten, aksesibilitas lebih baik, dan tidak perlu situs versi mobile terpisah. Uji cepat dengan Toggle Device Mode di DevTools untuk melihat breakpoints dan perilaku layout.\
+
+3. Padding: ruang di dalam border (antara konten dan border).
+Border: garis tepi elemen.
+Margin: ruang di luar border, memisahkan elemen dari elemen lain.
+
+4. Flexbox: tata letak 1 dimensi (baris atau kolom) dan alignment fleksibel.
+CSS Grid: tata letak 2 dimensi (baris dan kolom) yang pas untuk kerangka halaman/katalog.
+
+5. 
+a. Siapkan styling
+- Aktifkan static files & tambahkan Tailwind via CDN di base.html.
+- Tambah static/css/global.css untuk gaya form + override dark mode (termasuk autofill).
+
+b. Layout dasar
+- Buat base.html bertema gelap (slate) dengan aksen violet.
+- Buat navbar.html responsif + hamburger. Pastikan semua link pakai namespace main:.
+
+c. Model & form
+- Gunakan model Product (name, price, description, thumbnail, category, is_featured, user).
+- Pakai ProductForm untuk tambah/edit.
+
+d. Routing & views (CRUD Product)
+- '' → product_list (home).
+- products/new/ → product_create.
+- products/<int:pk>/ → product_detail.
+- products/<int:pk>/edit/ → product_edit.
+- products/<int:pk>/delete/ → product_delete.
+
+
+e. Template halaman
+- Home (home.html): grid card responsif (1/2/3 kolom), tombol Detail/Edit/Delete, tombol filter All/My, 
+- Detail (detail_product.html): tampilkan foto produk besar di atas, harga, deskripsi, dan aksi.
+- Add/Edit (add_product.html / edit_product.html): card gelap + kelas .dark-form, tombol ungu.
+- Auth (login.html/register.html): kotak gelap, input/placeholder terang, 

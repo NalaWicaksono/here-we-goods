@@ -1,84 +1,55 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="utf-8" />
-  <title>Here We Goods</title>
-  <style>
-    :root { --bg:#fff; --ink:#111; --muted:#666; --card:#fafafa; --ring:#e6e6e6; }
-    *{ box-sizing:border-box }
-    body{ margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-          color:var(--ink); background:var(--bg); }
-    header{ padding:32px 16px; border-bottom:1px solid var(--ring); }
-    .container{ max-width:960px; margin:0 auto; padding:0 16px; }
-    h1.site-title{ font-size:32px; letter-spacing:.5px; margin:0; font-weight:700; text-transform:lowercase; }
-    .tagline{ color:var(--muted); margin:6px 0 0 }
-    .actions{ margin:16px 0 8px }
-    .actions a{ text-decoration:none; color:#111; border:1px solid var(--ring); padding:8px 12px; border-radius:10px }
-    h2.section-title{ font-size:22px; font-weight:600; margin:24px 0 8px; letter-spacing:.2px; }
-    .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:16px; margin:12px 0 32px; }
-    .card{ background:var(--card); border:1px solid var(--ring); border-radius:14px; overflow:hidden; }
-    .thumb{ aspect-ratio: 4/3; width:100%; object-fit:cover; background:#eee; display:block; }
-    .card-body{ padding:12px 12px 14px }
-    h3.name{ font-weight:600; margin:0 0 6px; font-size:16px }
-    .desc{ margin:0; color:var(--muted); font-size:14px; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
-    .empty{ color:var(--muted); padding:12px 0 }
-  </style>
-</head>
-<body>
-  <header>
-    <div class="container">
-      <h1 class="site-title">Here We Goods</h1>
-      <p class="tagline">Embroidered Sports Apparel</p>
-      <div class="actions">
-       <a href="{% url 'main:add_item' %}">Add</a>
+{% extends 'base.html' %}
+{% block meta %}<title>Here We Goods — Home</title>{% endblock meta %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-      </div>
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Embroidered Jersey Store</h1>
+    <div class="flex gap-2">
+      <a href="?filter=all" class="px-3 py-2 border border-slate-700 text-slate-300 hover:text-white rounded">All</a>
+      <a href="?filter=my" class="px-3 py-2 border border-slate-700 text-slate-300 hover:text-white rounded">My Products</a>
+      <a href="{% url 'main:add_product' %}" class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded">Tambah Product</a>
     </div>
-  </header>
+  </div>
 
-<a href="{% url 'main:logout' %}">
-  <button>Logout</button>
-</a>
-<a href="?filter=all"><button type="button">All Items</button></a>
-<a href="?filter=my"><button type="button">My Items</button></a>
+  {% if product_list %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for p in product_list %}
+        <article class="bg-slate-800 border border-slate-700 rounded-xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col">
+          <a href="{% url 'main:product_detail' p.pk %}">
+            <img class="w-full aspect-[4/3] object-cover" src="{{ p.thumbnail|default:'https://via.placeholder.com/800x600?text=Jersey' }}" alt="{{ p.name }}" />
+          </a>
+          <div class="p-4 flex-1">
+            <h3 class="text-lg font-semibold text-white">{{ p.name }}</h3>
+            <p class="text-slate-300 mt-1">Rp {{ p.price|floatformat:0 }}</p>
+            <p class="text-slate-400 mt-2 line-clamp-3">{{ p.description }}</p>
+          </div>
+          {% if user.is_authenticated %}
+          <div class="px-4 pb-4 mt-auto flex flex-wrap gap-2">
+            <a href="{% url 'main:product_detail' p.pk %}" class="px-3 py-2 border border-slate-700 rounded text-slate-200 hover:bg-slate-700">Detail</a>
+            <a href="{% url 'main:product_edit' p.pk %}" class="px-3 py-2 border border-slate-700 rounded text-slate-200 hover:bg-slate-700">Edit</a>
+            <a href="{% url 'main:product_delete' p.pk %}" class="px-3 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded">Delete</a>
+          </div>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-16">
+      <p class="text-slate-300">Belum ada product.</p>
+      <a href="{% url 'main:add_product' %}" class="mt-4 inline-block px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded">Tambah Product</a>
+    </div>
+  {% endif %}
 
+  <!-- Sesi terakhir login dipindah ke bawah -->
+  <p class="mt-12 text-sm text-slate-400">Sesi terakhir login: {{ last_login }}</p>
 
-  <main class="container">
-    <!-- SUBJUDUL UNTUK LIST ITEM -->
-    <h2 class="section-title">Items</h2>
-
-    <div class="grid">
-  {% for item in product_list %}
-    <article class="card">
-      {% if item.thumbnail %}
-      <img class="thumb" src="{{ item.thumbnail }}" alt="{{ item.name }}">
-      {% else %}
-      <img class="thumb" src="https://via.placeholder.com/800x600?text=No+Image" alt="">
-      {% endif %}
-
-
-      <div class="card-body">
-        <h3 class="name">{{ item.name }}</h3>
-        <p class="desc">{{ item.description|default:"No description" }}</p>
-        <p style="margin-top:8px;font-size:12px">
-          <a href="{% url 'main:show_json_by_id' item.pk %}">JSON</a> ·
-          <a href="{% url 'main:show_xml_by_id' item.pk %}">XML</a>
-        </p>
-      </div>
-    </article>
-  {% empty %}
-    <p class="empty">Belum ada data.</p>
-  {% endfor %}
+  <div class="mt-6">
+    <h2 class="text-lg font-semibold">Data Delivery (Item)</h2>
+    <div class="flex gap-3 mt-2">
+      <a href="{% url 'main:show_json' %}" class="underline">/json/</a>
+      <a href="{% url 'main:show_xml' %}" class="underline">/xml/</a>
+    </div>
+  </div>
 </div>
-
-<h5>Sesi terakhir login: {{ last_login }}</h5>
-
-    <h2 class="section-title">Data Delivery</h2>
-    <ul>
-      <li><a href="{% url 'main:show_json' %}">/json/</a></li>
-      <li><a href="{% url 'main:show_xml' %}">/xml/</a></li>
-    </ul>
-  </main>
-</body>
-</html>
-
+{% endblock content %}
