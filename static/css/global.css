@@ -85,3 +85,47 @@
   -webkit-box-shadow:0 0 0 1000px #0f172a inset; box-shadow:0 0 0 1000px #0f172a inset;
   border:2px solid #7c3aed;
 }
+
+/* Auth helpers */
+.dark-form .errorlist li,
+.dark-form .field-error { color:#fca5a5; }            /* rose-300 */
+.dark-form .helptext { color:#94a3b8; }               /* slate-400 */
+.dark-form h1, .dark-form p, .dark-form label { opacity: 1; } /* lawan style opacity global */
+
+
+/* ==== Force dark inputs inside CRUD modal ==== */
+#crudModal input[type="text"],
+#crudModal input[type="number"],
+#crudModal input[type="url"],
+#crudModal textarea,
+#crudModal select {
+  background-color: #0f172a !important; /* slate-900 */
+  color: #e5e7eb !important;            /* slate-200 */
+  border: 2px solid #334155 !important; /* slate-700 */
+  border-radius: 0.5rem;                /* rounded */
+  padding: 0.5rem 0.75rem;              /* px-3 py-2 */
+}
+
+#crudModal input::placeholder,
+#crudModal textarea::placeholder {
+  color: #94a3b8 !important;            /* slate-400 */
+}
+
+#crudModal input:focus,
+#crudModal textarea:focus,
+#crudModal select:focus {
+  outline: none !important;
+  border-color: #7c3aed !important;     /* violet-600 */
+  box-shadow: 0 0 0 3px rgba(124,58,237,.25) !important;
+}
+
+/* Autofill fix */
+#crudModal input:-webkit-autofill,
+#crudModal input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #e5e7eb !important;
+  caret-color: #e5e7eb !important;
+  -webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
+  box-shadow: 0 0 0 1000px #0f172a inset !important;
+  border: 2px solid #7c3aed !important;
+}
+

@@ -1,0 +1,153 @@
+<div id="crudModal" class="hidden fixed inset-0 z-50 w-full items-center justify-center bg-black/50">
+  <div id="crudModalContent"
+       class="bg-slate-900 border border-slate-800 rounded-2xl w-11/12 sm:w-2/3 md:w-1/2 shadow-xl overflow-hidden scale-95 opacity-0 transition-all">
+    <!-- Header -->
+    <div class="flex items-start justify-between px-6 pt-5">
+      <div>
+        <h3 id="modalTitle" class="text-xl font-semibold text-white">Create Product</h3>
+        <p class="text-slate-400 text-sm">Tambah atau ubah produk jersey.</p>
+      </div>
+      <button type="button" class="text-slate-400 hover:text-slate-200 text-xl" onclick="hideModal()">&times;</button>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6 pt-4">
+      <form id="productForm" class="space-y-4">
+        {% csrf_token %}
+        <input type="hidden" id="productId">
+
+        <div>
+          <label class="block mb-1">Name</label>
+          <input id="name" name="name" required class="w-full rounded-lg"
+                 style="background-color:#0f172a !important;color:#e5e7eb !important;border:2px solid #334155 !important;padding:.5rem .75rem !important;" />
+        </div>
+
+        <div>
+          <label class="block mb-1">Price</label>
+          <input type="number" min="0" step="1" id="price" name="price" required class="w-full rounded-lg"
+                 style="background-color:#0f172a !important;color:#e5e7eb !important;border:2px solid #334155 !important;padding:.5rem .75rem !important;" />
+        </div>
+
+        <div>
+          <label class="block mb-1">Description</label>
+          <textarea id="description" name="description" rows="4" class="w-full rounded-lg"
+                    style="background-color:#0f172a !important;color:#e5e7eb !important;border:2px solid #334155 !important;padding:.5rem .75rem !important;"></textarea>
+        </div>
+
+        <div>
+          <label class="block mb-1">Thumbnail URL</label>
+          <input type="url" id="thumbnail" name="thumbnail" placeholder="https://…"
+                 class="w-full rounded-lg"
+                 style="background-color:#0f172a !important;color:#e5e7eb !important;border:2px solid #334155 !important;padding:.5rem .75rem !important;" />
+        </div>
+
+        <div>
+          <label class="block mb-1">Category</label>
+          <input type="text" id="category" name="category" placeholder="Jersey / Training / …"
+                 class="w-full rounded-lg"
+                 style="background-color:#0f172a !important;color:#e5e7eb !important;border:2px solid #334155 !important;padding:.5rem .75rem !important;" />
+        </div>
+
+        <label class="inline-flex items-center gap-2">
+          <input id="is_featured" name="is_featured" type="checkbox" class="w-4 h-4" style="accent-color:#7c3aed;">
+          <span>Featured</span>
+        </label>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="flex gap-3 p-6 pt-0">
+      <button type="button" onclick="hideModal()" class="px-4 py-2 border border-slate-700 text-slate-200 rounded hover:bg-slate-800">Cancel</button>
+      <button id="submitBtn" form="productForm" class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal konfirmasi Delete -->
+<div id="confirmModal" class="hidden fixed inset-0 z-50 w-full items-center justify-center bg-black/50">
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl w-11/12 max-w-md shadow-xl overflow-hidden">
+    <div class="px-6 pt-5">
+      <h3 class="text-lg font-semibold text-white">Hapus product?</h3>
+      <p class="text-slate-300 mt-2">Tindakan ini tidak bisa dibatalkan.</p>
+    </div>
+    <div class="p-6 flex gap-3">
+      <button type="button" class="px-4 py-2 border border-slate-700 text-slate-200 rounded hover:bg-slate-800" onclick="hideConfirm()">Batal</button>
+      <button type="button" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fokus & placeholder (global untuk modal) -->
+<style>
+  /* Teks di field modal jadi hitam */
+  #crudModal input,
+  #crudModal textarea,
+  #crudModal select {
+    color: #0f172a !important;      /* hampir hitam */
+    caret-color: #0f172a !important; /* warna kursor */
+  }
+  /* Placeholder agak gelap biar terbaca */
+  #crudModal input::placeholder,
+  #crudModal textarea::placeholder {
+    color: #334155 !important;      /* slate-700 */
+    opacity: 1;                     /* Safari/Firefox */
+  }
+  /* Autofill (Chrome/Edge/Safari) */
+  #crudModal input:-webkit-autofill,
+  #crudModal input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #0f172a !important;
+  }
+</style>
+
+<script>
+/* ===== Animasi modal ===== */
+function showModal(){ const m=document.getElementById('crudModal'); const c=document.getElementById('crudModalContent'); m.classList.remove('hidden'); m.classList.add('flex'); setTimeout(()=>{c.classList.add('scale-100','opacity-100')},15); }
+function hideModal(){ const m=document.getElementById('crudModal'); const c=document.getElementById('crudModalContent'); c.classList.remove('scale-100','opacity-100'); setTimeout(()=>{m.classList.add('hidden'); m.classList.remove('flex');},150); }
+function showConfirm(){ const m=document.getElementById('confirmModal'); m.classList.remove('hidden'); m.classList.add('flex'); }
+function hideConfirm(){ const m=document.getElementById('confirmModal'); m.classList.add('hidden'); m.classList.remove('flex'); }
+
+/* ===== CSRF helper ===== */
+function getCookie(name){ let v=null; if(document.cookie&&document.cookie!==''){ const cs=document.cookie.split(';'); for(let i=0;i<cs.length;i++){ const c=cs[i].trim(); if(c.substring(0,name.length+1)===(name+'=')){ v=decodeURIComponent(c.substring(name.length+1)); break; } } } return v; }
+const csrftoken=getCookie('csrftoken');
+
+/* ===== Open/Create/Update/Delete (AJAX) ===== */
+function openCreateModal(){
+  document.getElementById('modalTitle').textContent='Create Product';
+  productId.value=''; name.value=''; price.value=''; description.value=''; thumbnail.value=''; category.value=''; is_featured.checked=false;
+  document.getElementById('submitBtn').onclick=(e)=>{ e.preventDefault(); addProduct(); };
+  showModal();
+}
+async function openEditModal(id){
+  const res=await fetch(`/api/products/${id}/`); if(!res.ok) return;
+  const {data:p}=await res.json();
+  document.getElementById('modalTitle').textContent='Update Product';
+  productId.value=p.id; name.value=p.name; price.value=p.price; description.value=p.description||''; thumbnail.value=p.thumbnail||''; category.value=p.category||''; is_featured.checked=!!p.is_featured;
+  document.getElementById('submitBtn').onclick=(e)=>{ e.preventDefault(); updateProduct(); };
+  showModal();
+}
+async function addProduct(){
+  const fd=new FormData(document.getElementById('productForm'));
+  const res=await fetch(`/api/products/`,{method:"POST",body:fd,headers:{'X-CSRFToken':csrftoken},credentials:"same-origin"});
+  if(!res.ok){ showToast('Gagal','Create failed','error'); return; }
+  document.getElementById('productForm').reset(); hideModal(); showToast('Berhasil','Product created','success');
+  document.dispatchEvent(new CustomEvent('productsChanged'));
+}
+async function updateProduct(){
+  const id=document.getElementById('productId').value;
+  const payload={name:name.value,price:Number(price.value||0),description:description.value,thumbnail:thumbnail.value,category:category.value,is_featured:is_featured.checked};
+  const res=await fetch(`/api/products/${id}/`,{method:"PUT",body:JSON.stringify(payload),headers:{'X-CSRFToken':csrftoken,'Content-Type':'application/json'},credentials:"same-origin"});
+  if(!res.ok){ showToast('Gagal','Update failed','error'); return; }
+  hideModal(); showToast('Berhasil','Product updated','success'); document.dispatchEvent(new CustomEvent('productsChanged'));
+}
+let deleteIdForConfirm=null;
+function askDeleteProduct(id){ deleteIdForConfirm=id; showConfirm(); }
+document.getElementById('confirmDeleteBtn').addEventListener('click', async ()=>{
+  if(!deleteIdForConfirm) return;
+  const res=await fetch(`/api/products/${deleteIdForConfirm}/`,{method:"DELETE",headers:{'X-CSRFToken':csrftoken},credentials:"same-origin"});
+  hideConfirm();
+  if(!res.ok){ showToast('Gagal','Delete failed','error'); return; }
+  showToast('Berhasil','Product deleted','success'); document.dispatchEvent(new CustomEvent('productsChanged')); deleteIdForConfirm=null;
+});
+document.getElementById('productForm').addEventListener('submit',(e)=>{ e.preventDefault(); addProduct(); });
+
+</script>

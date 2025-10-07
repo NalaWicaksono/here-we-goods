@@ -8,8 +8,33 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="{% static 'css/global.css' %}">
 </head>
+{% include 'toast.html' %}
+{% include 'modal.html' %}
 <body class="bg-slate-900 text-slate-100">
   {% include 'navbar.html' %}
-  <main class="pt-20">{% block content %}{% endblock content %}</main>
+  <main class="pt-20">{% block content %}{% endblock content %}
+    <div id="crudModal" class="hidden fixed inset-0 z-50 w-full items-center justify-center bg-black/50">
+  </main>
+    {# Toast global & script #}
+  {% include 'toast.html' %}
+  {# Modal CRUD Product (dipakai di Home) #}
+  {% include 'modal.html' %}
+  <!-- Toast global -->
+<div id="toast" class="fixed bottom-4 left-1/2 -translate-x-1/2 hidden
+  px-4 py-2 rounded-lg border shadow bg-slate-800 border-slate-700 text-slate-100 z-[60]">
+</div>
+<script>
+  window.getCSRF = function(){ const m=document.cookie.match(/csrftoken=([^;]+)/); return m?m[1]:''; }
+  window.showToast = function(msg, ok=true){
+    const el=document.getElementById('toast');
+    el.textContent=msg;
+    el.classList.remove('hidden');
+    el.style.backgroundColor = ok ? '#4c1d95' : '#7f1d1d';
+    el.style.borderColor     = ok ? '#6d28d9' : '#b91c1c';
+    setTimeout(()=>el.classList.add('hidden'), 1800);
+  }
+</script>
+
+
 </body>
 </html>

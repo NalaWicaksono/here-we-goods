@@ -119,3 +119,52 @@ e. Template halaman
 - Detail (detail_product.html): tampilkan foto produk besar di atas, harga, deskripsi, dan aksi.
 - Add/Edit (add_product.html / edit_product.html): card gelap + kelas .dark-form, tombol ungu.
 - Auth (login.html/register.html): kotak gelap, input/placeholder terang, 
+
+Tugas 6
+1. Synchronous (full-page)
+
+Cara kerja: browser mengirim form → server merender HTML lengkap → browser memuat ulang seluruh halaman.
+
+Asynchronous (AJAX: fetch/XHR)
+
+Cara kerja: JavaScript mengirim request di background (umumnya JSON). Sambil menunggu, UI tetap hidup (bisa tampil loading).
+
+2. 
+- Event di UI (klik tombol “Publish”, “Login”) memicu fetch() / FormData.
+
+- Kirim request (POST/PUT/DELETE/GET) + CSRF token (header X-CSRFToken) ke endpoint, mis: /api/products/ atau /api/auth/login/.
+
+- URLconf Django memetakan ke view.
+
+- View memproses:
+
+1. Validasi pakai Form/ModelForm atau authenticate().
+
+2. Akses DB (create/update/delete/query).
+
+3. Balikkan JsonResponse + HTTP status yang tepat (201/200/400/404).
+
+- Frontend membaca JSON → update DOM (tutup modal, render kartu, tampilkan toast, refresh list) tanpa reload.
+
+3. 
+- UX jauh lebih cepat (hanya data yang perlu dikirim/diterima, bukan seluruh HTML).
+
+- Tanpa reload → state halaman (scroll, tab yang sedang aktif, input lain) tetap terjaga.
+
+- Interaksi halus: modal, inline validation, loading/empty/error state, toast.
+
+- Hemat bandwidth: kirim JSON kecil, bukan template penuh.
+
+4. 
+- Gunakan HTTPS selalu (lindungi kredensial & cookie).
+
+- CSRF protection: sertakan token ({% csrf_token %}), kirim via header X-CSRFToken. Jangan mem-bypass dengan @csrf_exempt.
+
+- Kredensial hanya via POST; jangan pernah lewat GET / querystring.
+
+5. 
+- Perceived performance lebih cepat → rasa seperti app.
+
+- Alur kerja mulus: modal CRUD, filter cepat, hasil muncul instan.
+
+- jika gagal jaringan, tampilkan retry, kita sudah punya tombol “Refresh” & “Coba lagi” tanpa harus refresh di browser

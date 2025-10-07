@@ -5,22 +5,35 @@
   <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 sm:p-8 form-style dark-form shadow">
     <h1 class="text-2xl font-bold mb-6 text-white">Login</h1>
 
-    <form method="POST">
+    <form id="login-form" method="POST" class="space-y-2">
       {% csrf_token %}
       {{ form.as_p }}
-      <button type="submit"
+      <button id="login-btn" type="submit"
               class="mt-4 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded w-full">
         Login
       </button>
     </form>
 
+    <p id="login-error" class="hidden mt-3 text-sm text-rose-400"></p>
+
     <p class="text-sm text-slate-300 mt-4">
       Belum punya akun? <a class="underline text-violet-300 hover:text-violet-200" href="{% url 'main:register' %}">Register</a>
     </p>
-
-    {% if messages %}
-      <ul class="mt-3 text-sm text-rose-400">{% for message in messages %}<li>{{ message }}</li>{% endfor %}</ul>
-    {% endif %}
   </div>
 </div>
+<script>
+  const form=document.getElementById('login-form'), btn=document.getElementById('login-btn'), err=document.getElementById('login-error');
+  const csrf=()=>document.querySelector('input[name=csrfmiddlewaretoken]').value;
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault(); err.classList.add('hidden'); btn.disabled=true; btn.textContent='Memproses…';
+    try{
+      const fd=new FormData(form);
+      const r=await fetch("{% url 'main:api_login' %}",{method:"POST",body:fd,headers:{"X-CSRFToken":csrf()}});
+      const j=await r.json();
+      if(j.ok){ window.showToast('Login berhasil', true); setTimeout(()=>location.href="{% url 'main:show_main' %}",500); }
+      else{ err.textContent=j.error||"Login gagal"; err.classList.remove('hidden'); window.showToast('Login gagal', false); }
+    }catch(_){ err.textContent="Network error"; err.classList.remove('hidden'); }
+    finally{ btn.disabled=false; btn.textContent='Login'; }
+  });
+</script>
 {% endblock content %}

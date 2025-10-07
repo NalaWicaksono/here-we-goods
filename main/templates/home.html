@@ -1,55 +1,171 @@
 {% extends 'base.html' %}
-{% block meta %}<title>Here We Goods — Home</title>{% endblock meta %}
+{% block meta %}<title>Here We Goods — AJAX</title>{% endblock meta %}
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
   <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold">Embroidered Jersey Store</h1>
+    <div>
+      <h1 class="text-2xl font-bold">Embroidered Jersey Store</h1>
+      <p class="text-slate-400 text-sm">Kelola produk tanpa reload halaman.</p>
+    </div>
     <div class="flex gap-2">
-      <a href="?filter=all" class="px-3 py-2 border border-slate-700 text-slate-300 hover:text-white rounded">All</a>
-      <a href="?filter=my" class="px-3 py-2 border border-slate-700 text-slate-300 hover:text-white rounded">My Products</a>
-      <a href="{% url 'main:add_product' %}" class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded">Tambah Product</a>
+      <button id="btn-all" class="px-3 py-2 border border-slate-700 text-slate-300 rounded hover:bg-slate-700">All</button>
+      <button id="btn-my" class="px-3 py-2 border border-slate-700 text-slate-300 rounded hover:bg-slate-700">My Products</button>
+      <button id="btn-create" class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded">Tambah Product</button>
+      <button id="btn-refresh" class="px-3 py-2 border border-slate-700 text-slate-300 rounded hover:bg-slate-700">Refresh</button>
     </div>
   </div>
 
-  {% if product_list %}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {% for p in product_list %}
-        <article class="bg-slate-800 border border-slate-700 rounded-xl shadow-sm hover:shadow-md transition overflow-hidden flex flex-col">
-          <a href="{% url 'main:product_detail' p.pk %}">
-            <img class="w-full aspect-[4/3] object-cover" src="{{ p.thumbnail|default:'https://via.placeholder.com/800x600?text=Jersey' }}" alt="{{ p.name }}" />
-          </a>
-          <div class="p-4 flex-1">
-            <h3 class="text-lg font-semibold text-white">{{ p.name }}</h3>
-            <p class="text-slate-300 mt-1">Rp {{ p.price|floatformat:0 }}</p>
-            <p class="text-slate-400 mt-2 line-clamp-3">{{ p.description }}</p>
-          </div>
-          {% if user.is_authenticated %}
-          <div class="px-4 pb-4 mt-auto flex flex-wrap gap-2">
-            <a href="{% url 'main:product_detail' p.pk %}" class="px-3 py-2 border border-slate-700 rounded text-slate-200 hover:bg-slate-700">Detail</a>
-            <a href="{% url 'main:product_edit' p.pk %}" class="px-3 py-2 border border-slate-700 rounded text-slate-200 hover:bg-slate-700">Edit</a>
-            <a href="{% url 'main:product_delete' p.pk %}" class="px-3 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded">Delete</a>
-          </div>
-          {% endif %}
-        </article>
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="text-center py-16">
-      <p class="text-slate-300">Belum ada product.</p>
-      <a href="{% url 'main:add_product' %}" class="mt-4 inline-block px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded">Tambah Product</a>
-    </div>
-  {% endif %}
+  <div id="state-loading" class="hidden text-slate-300">Loading…</div>
+  <div id="state-error" class="hidden text-rose-400">Terjadi kesalahan. <button class="underline" id="retry">Coba lagi</button></div>
+  <div id="state-empty" class="hidden text-slate-300">Belum ada product.</div>
 
-  <!-- Sesi terakhir login dipindah ke bawah -->
+  <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
   <p class="mt-12 text-sm text-slate-400">Sesi terakhir login: {{ last_login }}</p>
+</div>
 
-  <div class="mt-6">
-    <h2 class="text-lg font-semibold">Data Delivery (Item)</h2>
-    <div class="flex gap-3 mt-2">
-      <a href="{% url 'main:show_json' %}" class="underline">/json/</a>
-      <a href="{% url 'main:show_xml' %}" class="underline">/xml/</a>
+<!-- Modal Create/Update -->
+<div id="modal" class="fixed inset-0 hidden items-center justify-center bg-black/50 z-50">
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl shadow-xl overflow-hidden">
+    <div class="flex items-start justify-between px-6 pt-5">
+      <div>
+        <h2 id="modal-title" class="text-xl font-bold text-white">Create Product</h2>
+        <p class="text-slate-400 text-sm">Tambah atau ubah produk jersey secara instan.</p>
+      </div>
+      <button id="modal-close" class="text-slate-400 hover:text-slate-200 text-xl">&times;</button>
+    </div>
+    <div class="p-6 pt-4">
+      <form id="form-product" class="space-y-4 dark-form form-style">
+        {% csrf_token %}
+        <input type="hidden" id="field-id" />
+        <div><label class="block mb-1">Name</label><input id="field-name" class="w-full" required/></div>
+        <div><label class="block mb-1">Price</label><input id="field-price" type="number" min="0" step="1" class="w-full" required/></div>
+        <div><label class="block mb-1">Description</label><textarea id="field-desc" rows="4" class="w-full"></textarea></div>
+        <div><label class="block mb-1">Thumbnail URL</label><input id="field-thumb" type="url" class="w-full"/></div>
+        <div><label class="block mb-1">Category</label><input id="field-cat" class="w-full"/></div>
+        <label class="inline-flex items-center gap-2"><input id="field-featured" type="checkbox"/><span>Featured</span></label>
+        <div class="flex items-center justify-between pt-2">
+          <button type="button" id="btn-cancel" class="px-4 py-2 border border-slate-700 text-slate-200 rounded hover:bg-slate-800">Cancel</button>
+          <button type="submit" id="btn-submit" class="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded">Publish</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
+
+<!-- Modal Delete -->
+<div id="modal-del" class="fixed inset-0 hidden items-center justify-center bg-black/50 z-50">
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-xl overflow-hidden">
+    <div class="px-6 pt-5">
+      <h3 class="text-lg font-semibold text-white">Hapus product?</h3>
+      <p class="text-slate-300 mt-2">Tindakan ini tidak bisa dibatalkan.</p>
+    </div>
+    <div class="p-6 flex gap-3">
+      <button id="del-cancel" class="px-4 py-2 border border-slate-700 text-slate-200 rounded hover:bg-slate-800">Batal</button>
+      <button id="del-confirm" class="px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // helpers
+  const grid = document.getElementById("grid");
+  const loading = document.getElementById("state-loading");
+  const empty = document.getElementById("state-empty");
+  const errS = document.getElementById("state-error");
+  const csrf = () => (document.querySelector("input[name=csrfmiddlewaretoken]")?.value) || (document.cookie.match(/csrftoken=([^;]+)/)||[])[1];
+  const show = el => el.classList.remove("hidden");
+  const hide = el => el.classList.add("hidden");
+  let scope = 'all', deleteId = null;
+
+  function badge(p){
+    const b1 = p.is_featured ? '<span class="text-xs bg-violet-700/40 border border-violet-700 text-violet-200 px-2 py-0.5 rounded-full">Featured</span>' : '';
+    const b2 = p.category ? `<span class="text-xs bg-slate-700 border border-slate-600 text-slate-200 px-2 py-0.5 rounded-full">${p.category}</span>` : '';
+    return b1 + (b1 && b2 ? '&nbsp;' : '') + b2;
+  }
+  function card(p){
+    return `
+    <article class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden flex flex-col">
+      <a href="/products/${p.id}/"><img class="w-full aspect-[4/3] object-cover" src="${p.thumbnail || 'https://via.placeholder.com/800x600?text=Jersey'}" alt="${p.name}"></a>
+      <div class="p-4 flex-1">
+        <div class="flex items-center gap-2 mb-2">${badge(p)}</div>
+        <h3 class="text-lg font-semibold">${p.name}</h3>
+        <p class="text-slate-300 mt-1">Rp ${Number(p.price||0).toLocaleString('id-ID')}</p>
+        <p class="text-slate-400 mt-2 line-clamp-3">${p.description || ''}</p>
+      </div>
+      <div class="px-4 pb-4 mt-auto flex flex-wrap gap-2">
+        <button data-act="edit" data-id="${p.id}" class="px-3 py-2 border border-slate-700 rounded text-slate-200 hover:bg-slate-700">Edit</button>
+        <button data-act="del"  data-id="${p.id}" class="px-3 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded">Delete</button>
+      </div>
+    </article>`;
+  }
+
+  async function loadList(){
+    hide(errS); hide(empty); show(loading);
+    try {
+      const r = await fetch(`/api/products/?filter=${scope}`);
+      const j = await r.json();
+      grid.innerHTML = "";
+      (j.data || []).forEach(p => grid.insertAdjacentHTML('beforeend', card(p)));
+      if (!j.data || j.data.length === 0) show(empty);
+    } catch(e){ show(errS); }
+    finally { hide(loading); }
+  }
+  loadList();
+
+  document.getElementById("btn-all").onclick = ()=>{ scope='all'; loadList(); };
+  document.getElementById("btn-my").onclick  = ()=>{ scope='my';  loadList(); };
+  document.getElementById("btn-refresh").onclick = loadList;
+  document.getElementById("retry").onclick = loadList;
+
+  // modal create/update
+  const modal = document.getElementById("modal");
+  const modalClose = document.getElementById("modal-close");
+  const form = document.getElementById("form-product");
+  const title = document.getElementById("modal-title");
+  const f = {
+    id: document.getElementById("field-id"),
+    name: document.getElementById("field-name"),
+    price: document.getElementById("field-price"),
+    desc: document.getElementById("field-desc"),
+    thumb: document.getElementById("field-thumb"),
+    cat: document.getElementById("field-cat"),
+    feat: document.getElementById("field-featured"),
+  };
+  function openCreate(){ title.textContent="Create Product"; f.id.value=""; f.name.value=""; f.price.value=""; f.desc.value=""; f.thumb.value=""; f.cat.value=""; f.feat.checked=false; modal.classList.add("flex"); show(modal); }
+  function openEdit(p){ title.textContent="Update Product"; f.id.value=p.id; f.name.value=p.name; f.price.value=p.price; f.desc.value=p.description; f.thumb.value=p.thumbnail; f.cat.value=p.category; f.feat.checked=!!p.is_featured; modal.classList.add("flex"); show(modal); }
+  function closeModal(){ hide(modal); modal.classList.remove("flex"); }
+  document.getElementById("btn-create").onclick = openCreate;
+  document.getElementById("btn-cancel").onclick = closeModal;
+  modalClose.onclick = closeModal;
+
+  form.addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    const payload = { name:f.name.value, price:Number(f.price.value||0), description:f.desc.value, thumbnail:f.thumb.value, category:f.cat.value, is_featured:f.feat.checked };
+    const id=f.id.value, url = id? `/api/products/${id}/` : `/api/products/`, method = id? "PUT":"POST";
+    const r = await fetch(url,{ method, headers:{ "Content-Type":"application/json", "X-CSRFToken": csrf() }, body: JSON.stringify(payload) });
+    const j = await r.json();
+    if (j.ok){ window.showToast(id? "Product updated":"Product created", true); closeModal(); loadList(); }
+    else { window.showToast(Object.values(j.errors||{}).flat().join(", "), false); }
+  });
+
+  // edit/delete delegasi
+  grid.addEventListener("click", async (e)=>{
+    const b = e.target.closest("button"); if(!b) return;
+    const id = b.dataset.id;
+    if (b.dataset.act === "edit"){
+      const r = await fetch(`/api/products/${id}/`); const j = await r.json(); openEdit(j.data);
+    }
+    if (b.dataset.act === "del"){ deleteId = id; show(modalDel); modalDel.classList.add("flex"); }
+  });
+
+  // modal delete
+  const modalDel = document.getElementById("modal-del");
+  document.getElementById("del-cancel").onclick = ()=>{ hide(modalDel); modalDel.classList.remove("flex"); deleteId=null; };
+  document.getElementById("del-confirm").onclick = async ()=>{
+    const r = await fetch(`/api/products/${deleteId}/`, { method:"DELETE", headers:{ "X-CSRFToken": csrf() }});
+    if (r.ok){ window.showToast("Product deleted", true); loadList(); }
+    hide(modalDel); modalDel.classList.remove("flex"); deleteId=null;
+  };
+</script>
 {% endblock content %}
